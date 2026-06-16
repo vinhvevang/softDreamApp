@@ -18,21 +18,45 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:new_fresher_training/home.dart';
 import 'package:new_fresher_training/login.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:new_fresher_training/home.dart';
+import 'package:new_fresher_training/login.dart';
+
+import 'product_bloc.dart';
+
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  WidgetsFlutterBinding.ensureInitialized();  // create widget
-    await Hive.initFlutter(); // create hive
-    await Hive.openBox('loginBox');// create a loginBox  in phone
+  await Hive.initFlutter();
+  await Hive.openBox('loginBox');
+
   runApp(const MyApp());
-
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Box box = Hive.box('loginBox');// refer to this folder in phone(Compulsory line)
-    bool isLogin =  box.get('isLogin',defaultValue: false);
-    return MaterialApp(home:isLogin ? const Home() :const Login(),debugShowCheckedModeBanner: false,);
-  } 
+    final box = Hive.box('loginBox');
+    final bool isLogin = box.get(
+      'isLogin',
+      defaultValue: false,
+    );
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => ProductBloc()..add(LoadProducts()),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: isLogin ? const Home() : const Login(),
+      ),
+    );
+  }
 }

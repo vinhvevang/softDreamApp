@@ -35,14 +35,12 @@ THE WAY TO PUSH AN PROJECT UP GITHUB
 
   -  create repo in github
   -  in cmd prj:
-  + git init
-  + git add.
-  + git commit -m "..."
-  + git remote add origin <link>
-  + (use git remove -v to check times)
-  - if it is the first time: 
-  + git branch -M main
-  + git push -u origin main
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/vinhvevang/ten-repo-moi.git
+git push -u origin main
 
  $) the next time :
  + git add . 
@@ -54,6 +52,5 @@ THE WAY TO PUSH AN PROJECT UP GITHUB
  + git checkout -b <branch name> (name branch)
  + git push -u origin <branch name> (push branch to github)
 
-git push -u origin <branch name>
 
 git checkout main
