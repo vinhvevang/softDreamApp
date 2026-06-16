@@ -1,23 +1,23 @@
-class ProductModel {
+class Product {
   final String id;
   final String name;
   final int quanity;
   final int price;
 
-  ProductModel({
+  const Product({
     required this.id,
     required this.name,
     required this.quanity,
     required this.price,
   });
 
-  ProductModel copyWith({// use it to change nor all atribute and avoid exception null
+  Product copyWith({
     String? id,
     String? name,
     int? quanity,
     int? price,
   }) {
-    return ProductModel(
+    return Product(
       id: id ?? this.id,
       name: name ?? this.name,
       quanity: quanity ?? this.quanity,

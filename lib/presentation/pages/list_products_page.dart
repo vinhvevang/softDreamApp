@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:new_fresher_training/model/model.dart';
-import 'product_bloc.dart';
+import '../../../domain/entities/product.dart';
+import '../bloc/product/product_bloc.dart';
+import '../bloc/product/product_event.dart';
+import '../bloc/product/product_state.dart';
 
 class ListProductsPage extends StatefulWidget {
   const ListProductsPage({super.key});
@@ -71,27 +73,11 @@ class _ListProductsPageState extends State<ListProductsPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final name = nameController.text.trim();
-                final quanity = int.tryParse(quanityController.text.trim());
-                final price = int.tryParse(priceController.text.trim());
-
-                if (name.isEmpty || quanity == null || price == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Vui lòng nhập đủ tên, số lượng và giá."),
-                    ),
-                  );
-                  return;
-                }
-
                 context.read<ProductBloc>().add(
-                      AddProduct(
-                        ProductModel(
-                          id: DateTime.now().microsecondsSinceEpoch.toString(),
-                          name: name,
-                          quanity: quanity,
-                          price: price,
-                        ),
+                      AddProductRequested(
+                        name: nameController.text,
+                        quanity: quanityController.text,
+                        price: priceController.text,
                       ),
                     );
 
@@ -105,7 +91,7 @@ class _ListProductsPageState extends State<ListProductsPage> {
     );
   }
 
-  void _showEditDialog(ProductModel product) {
+  void _showEditDialog(Product product) {
     final nameController = TextEditingController(text: product.name);
     final quanityController =
         TextEditingController(text: product.quanity.toString());
@@ -158,26 +144,12 @@ class _ListProductsPageState extends State<ListProductsPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                final name = nameController.text.trim();
-                final quanity = int.tryParse(quanityController.text.trim());
-                final price = int.tryParse(priceController.text.trim());
-
-                if (name.isEmpty || quanity == null || price == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Vui lòng nhập đủ tên, số lượng và giá."),
-                    ),
-                  );
-                  return;
-                }
-
                 context.read<ProductBloc>().add(
-                      UpdateProduct(
-                        product.copyWith(
-                          name: name,
-                          quanity: quanity,
-                          price: price,
-                        ),
+                      UpdateProductRequested(
+                        product: product,
+                        name: nameController.text,
+                        quanity: quanityController.text,
+                        price: priceController.text,
                       ),
                     );
 
@@ -367,7 +339,7 @@ class _ListProductsPageState extends State<ListProductsPage> {
                                 IconButton(
                                   onPressed: () {
                                     context.read<ProductBloc>().add(
-                                          DeleteProduct(product.id),
+                                          DeleteProductRequested(product.id),
                                         );
                                   },
                                   icon: const Icon(Icons.delete),

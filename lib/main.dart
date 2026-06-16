@@ -1,38 +1,23 @@
-/*
-Box is the same Map, but Box in Hive will save data on memory's phone, Map is saved on Ram-
-It is the re
-ason why close app and open again ,some data is still saved
-some steps:
-
-`Hive.initFlutter()`- create hive for Flutter enviroment
-`Hive.openBox('<String>')` - create a folder in phone
-`Hive.Box('<String>')` - refer to that folder
-`box.get('', <real_value in TextField> )` - read data from text field, prepare to save
-`box.put('', <real_value in TextField> )` - save data from text field
- */
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:new_fresher_training/home.dart';
-import 'package:new_fresher_training/login.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:new_fresher_training/home.dart';
-import 'package:new_fresher_training/login.dart';
+import 'package:new_fresher_training/presentation/bloc/auth/auth_state.dart';
 
-import 'product_bloc.dart';
+import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/product_repository_impl.dart';
+import 'domain/repositories/auth_repository.dart';
+import 'domain/repositories/product_repository.dart';
+import 'presentation/bloc/auth/auth_bloc.dart';
+import 'presentation/bloc/auth/auth_event.dart';
+import 'presentation/bloc/product/product_bloc.dart';
+import 'presentation/bloc/product/product_event.dart';
+import 'presentation/pages/home_page.dart';
+import 'presentation/pages/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Hive.initFlutter();
   await Hive.openBox('loginBox');
-
   runApp(const MyApp());
 }
 
@@ -41,21 +26,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box('loginBox');
-    final bool isLogin = box.get(
-      'isLogin',
-      defaultValue: false,
-    );
-
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(
-          create: (_) => ProductBloc()..add(LoadProducts()),
+        RepositoryProvider<ProductRepository>(
+          create: (_) => ProductRepositoryImpl(),
+        ),
+        RepositoryProvider<AuthRepository>(
+          create: (_) => AuthRepositoryImpl(Hive.box('loginBox')),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: isLogin ? const Home() : const Login(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>(
+            create: (context) => AuthBloc(context.read<AuthRepository>())
+              ..add(AuthStarted()),
+          ),
+          BlocProvider<ProductBloc>(
+            create: (context) => ProductBloc(context.read<ProductRepository>())
+              ..add(LoadProducts()),
+          ),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: BlocBuilder<AuthBloc, dynamic>(
+            builder: (context, state) {
+              final authState = context.read<AuthBloc>().state;
+              return authState.status == AuthStatus.authenticated
+                  ? const HomePage()
+                  : const LoginPage();
+            },
+          ),
+        ),
       ),
     );
   }
